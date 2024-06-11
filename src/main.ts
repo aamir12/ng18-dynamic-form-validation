@@ -1,16 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import 'zone.js';
 import { Subscription, tap } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 import { LabelComponent } from './label.component';
+import { ControlErrorComponent } from './error.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LabelComponent],
+  imports: [CommonModule, ReactiveFormsModule, LabelComponent,ControlErrorComponent],
   template: `
 
     <div class="container">
@@ -18,45 +19,33 @@ import { LabelComponent } from './label.component';
     <h2 class="my-3 text-center">Dynamic Form Validation</h2>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-light p-3 rounded" >
       <div class="mb-3">
-        <app-label for="firstName" [control]="form.controls.firstName">First Name</app-label>
+        <app-label for="firstName" [control]="firstName">First Name</app-label>
         <input id="firstName" type="text" class="form-control" formControlName="firstName">
+        <control-error controlName="firstName" />
+
       </div>
 
       <div class="mb-3">
-        <label for="lastName">Last Name</label>
+        <app-label for="lastName" [control]="lastName" >Last Name</app-label>
         <input type="text" class="form-control" formControlName="lastName">
+        <control-error controlName="lastName" [customErrors]="{ required: 'This can not be empty'}" />
       </div>
 
       <div class="mb-3">
-        <app-label for="yearOfBirth"  [control]="form.controls.yearOfBirth" >Year of Birth</app-label>
+        <app-label for="yearOfBirth"  [control]="yearOfBirth" >Year of Birth</app-label>
         <select class="form-select"  formControlName="yearOfBirth">
               <option [ngValue]="null">Select  Date</option>
               <option [value]="year" *ngFor="let year of years">{{year}} </option>
         </select>
+        <control-error controlName="yearOfBirth" />
       </div>
 
       <div class="mb-3">
         <app-label class="form-label" [control]="form.controls.passport">Paasport 
-      
       </app-label>
         <input class="form-control" type="text" formControlName="passport">
-
-        <ng-container *ngIf="form.controls.passport as passport">
-          <small class="text-danger" *ngIf="passport.dirty && passport.hasError('pattern')">
-            Allowed valid format
-          </small>
-
-          <small class="text-danger" *ngIf="passport.dirty && passport.hasError('required')">
-            Required
-          </small>
-
-        </ng-container>
-
-
+        <control-error controlName="passport" [customErrors]="{ pattern: 'Invalid passport'}" />
       </div>
-
-
-      
 
       <div class="d-grid gap-2">
   <button class="btn btn-primary" [disabled]="form.invalid" type="submit">Save</button>
@@ -143,6 +132,21 @@ export class App implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub.unsubscribe();
+  }
+
+  get firstName(): FormControl {
+    return this.form.get('firstName') as FormControl;
+  }
+
+  get lastName(): FormControl {
+    return this.form.get('lastName') as FormControl;
+  }
+
+  get yearOfBirth(): FormControl {
+    return this.form.get('yearOfBirth') as FormControl;
+  }
+  get passport(): FormControl {
+    return this.form.get('passport') as FormControl;
   }
 }
 
