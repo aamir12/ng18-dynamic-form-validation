@@ -29,7 +29,7 @@ export class LabelComponent {
   @Input() control!: AbstractControl;
 
   get required(): boolean {
-    console.log(this.control);
+    // console.log(this.control);
     return this.control.hasValidator(Validators.required);
   }
 }

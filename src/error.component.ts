@@ -1,7 +1,7 @@
 import { AsyncPipe, NgIf } from "@angular/common";
-import { ChangeDetectionStrategy, Component, InjectionToken, Input, OnDestroy, OnInit, inject } from "@angular/core";
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, InjectionToken, Input, OnDestroy, OnInit, inject } from "@angular/core";
 import { FormGroupDirective, ValidationErrors } from "@angular/forms";
-import { BehaviorSubject, Subscription, distinctUntilChanged, merge } from "rxjs";
+import { BehaviorSubject, Subscription, distinctUntilChanged, merge, tap } from "rxjs";
 
 const defaultErrors: {
     [key: string]: any;
@@ -20,7 +20,7 @@ const defaultErrors: {
     standalone: true,
     selector: 'control-error',
     imports: [AsyncPipe,NgIf],
-    template: '<small class="text-danger d-block my-1" *ngIf="message$ | async as message">{{ message }}</small>',
+    template: '<small class="text-danger d-block my-1" *ngIf="(message$ | async) as message">{{ message }}</small>',
     changeDetection: ChangeDetectionStrategy.OnPush,
   })
   export class ControlErrorComponent implements OnInit, OnDestroy {
@@ -28,20 +28,22 @@ const defaultErrors: {
     private formGroupDirective = inject(FormGroupDirective);
     errors = inject(FORM_ERRORS);
     message$ = new BehaviorSubject<string>('');
-  
+    // cdr = inject(ChangeDetectorRef);
     @Input() controlName!: string;
     @Input() customErrors?: ValidationErrors;
   
+    errorMessage = '';
     ngOnInit(): void {
+     
       if (this.formGroupDirective) {
         const control = this.formGroupDirective.control.get(this.controlName);
   
         if (control) {
           this.subscription = merge(control.valueChanges, this.formGroupDirective.ngSubmit)
-            .pipe(distinctUntilChanged())
+            // .pipe(distinctUntilChanged())
             .subscribe(() => {
               const controlErrors = control.errors;
-  
+              console.log("eee",controlErrors);
               if (controlErrors) {
                 const firstKey = Object.keys(controlErrors)[0];
                 const getError = this.errors[firstKey];
@@ -64,7 +66,11 @@ const defaultErrors: {
     }
   
     setError(text: string) {
+      // console.log("error",text);
+      
       this.message$.next(text);
+      
+      // this.cdr.detectChanges();
     }
   
     ngOnDestroy(): void {

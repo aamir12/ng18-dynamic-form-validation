@@ -82,7 +82,7 @@ export class App implements OnInit, OnDestroy {
   ngOnInit() {
     this.setupYear();
     //issue in the below code
-    //this.setUpValidation();
+    // this.setUpValidation();
     this.setUpBetterSolution();
   }
 
@@ -103,7 +103,7 @@ export class App implements OnInit, OnDestroy {
   setUpBetterSolution() {
     this.sub = this.form.controls.yearOfBirth.valueChanges
       .pipe(
-        tap(() => this.form.controls.passport.markAsDirty()),
+        // tap(() => this.form.controls.passport.markAsDirty()),
         startWith(this.form.controls.yearOfBirth.value)
       )
       .subscribe((yearOfBirth) => {
